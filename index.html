@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Sorry Bash Game 🥺</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Beautiful, clean and emotional fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Confetti Library for a stunning celebratory ending -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* ================= COOSMIC STARRY NIGHT THEMING ================= */
+        :root {
+            --bg-color-1: #120324;
+            --bg-color-2: #2d0b54;
+            --accent-pink: #ff7597;
+            --accent-pink-hover: #e05377;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #2b1055;
+            --text-light: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color-1), var(--bg-color-2));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Ambient glowing background circles */
+        .glowing-orb {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            background: #ff7597;
+            top: 10%;
+            left: 10%;
+        }
+
+        .orb-2 {
+            background: #8b5cf6;
+            bottom: 15%;
+            right: 10%;
+        }
+
+        /* Subtle floating star sparkles */
+        .sparkles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.4;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1.5px, transparent 30px);
+            background-size: 400px 400px, 250px 250px;
+            background-position: 0 0, 70px 120px;
+        }
+
+        /* ================= DEVICE CARD HOLDER ================= */
+        .app-container {
+            width: 100%;
+            max-width: 430px; /* Perfect smartphone screen simulator aspect ratio */
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            z-index: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Screen States Transitions */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================= GENERAL TYPOGRAPHY ================= */
+        h1, h2, h3 {
+            font-family: 'Fredoka', sans-serif;
+            text-align: center;
+        }
+
+        .title-text {
+            color: var(--text-light);
+            font-size: 32px;
+            margin-bottom: 8px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .desc-text {
+            color: #cbd5e1;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        /* ================= CUSTOM SHAPE CARDS ================= */
+        .white-rounded-card {
+            background: var(--glass-bg);
+            border-radius: 28px;
+            padding: 30px 25px;
+            width: 100%;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-header-text {
+            color: var(--text-dark);
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* ================= INPUT & ACTION BUTTONS ================= */
+        .input-wrapper {
+            width: 100%;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 18px;
+            border: 2px solid #ebd3dc;
+            background-color: #faf6f8;
+            font-size: 16px;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .custom-input:focus {
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 10px rgba(255, 117, 151, 0.2);
+            background-color: #fff;
+        }
+
+        .custom-input::placeholder {
+            color: #b0a3b8;
+            font-weight: 500;
+        }
+
+        .action-btn {
+            background-color: var(--accent-pink);
+            color: white;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            padding: 15px 40px;
+            border-radius: 18px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 6px 15px rgba(255, 117, 151, 0.35);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            background-color: var(--accent-pink-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 117, 151, 0.45);
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* ================= GAMEBOARD WIDGET (3 STEPS) ================= */
+        .game-track {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            margin: 30px 0;
+            padding: 0 20px;
+        }
+
+        .game-line-bg {
+            position: absolute;
+            height: 6px;
+            background: rgba(255,255,255,0.15);
+            left: 40px;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 0;
+            border-radius: 3px;
+        }
+
+        .game-line-progress {
+            position: absolute;
+            height: 6px;
+            background: var(--accent-pink);
+            left: 40px;
+            width: 0%; /* Dynamic width based on game level progress */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .game-node {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #3f1573;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            color: #9d80c0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s ease;
+        }
+
+        .game-node.active {
+            background-color: var(--accent-pink);
+            border-color: #fff;
+            color: #fff;
+            box-shadow: 0 0 15px var(--accent-pink);
+            transform: scale(1.15);
+        }
+
+        .game-node.completed {
+            background-color: #10b981;
+            border-color: #fff;
+            color: #fff;
+        }
+
+        /* ================= CONTENT STAGES ================= */
+        .step-showcase {
+            width: 100%;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .funny-illustration-container {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent-pink);
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .funny-illustration-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .funny-caption {
+            font-size: 18px;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+        }
+
+        /* Polaroid style frame for Memory page */
+        .polaroid-frame {
+            background: white;
+            padding: 12px 12px 24px 12px;
+            border-radius: 8px;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+            transform: rotate(-3deg);
+            width: 220px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .polaroid-frame img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .polaroid-caption {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 16px;
+            color: #334155;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        /* ================= DIGITAL ENVELOPE / SCROLL ================= */
+        .envelope-container {
+            width: 100%;
+            background: #fffdf5;
+            border-radius: 20px;
+            border-top: 15px solid #ff7597;
+            padding: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            color: #334155;
+            margin-bottom: 20px;
+            transform: scale(0.98);
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-container p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #475569;
+        }
+
+        .envelope-container .letter-sig {
+            text-align: right;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            margin-top: 15px;
+        }
+
+        /* ================= VIRTUAL CAKE ELEMENT ================= */
+        .cake-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+
+        .cake-graphic {
+            font-size: 70px;
+            animation: bounce 2s infinite ease;
+            position: relative;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .cake-label {
+            font-size: 15px;
+            color: #cbd5e1;
+            margin-top: 8px;
+            font-weight: 600;
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        /* Footing / Explore */
+        .footer-brand {
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .footer-brand a {
+            color: var(--accent-pink);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient luminous background elements -->
+    <div class="glowing-orb orb-1"></div>
+    <div class="glowing-orb orb-2"></div>
+    <div class="sparkles-container"></div>
+
+    <div class="app-container">
+
+        <!-- ================= SCREEN 1: WHO TO SAY SORRY TO? ================= -->
+        <div class="screen active" id="screen-input">
+            <div style="text-align: center; margin-top: 20px;">
+                <h1 class="title-text">My HeartCraft</h1>
+                <p class="desc-text">Create beautiful, digital surprises for free</p>
+            </div>
+
+            <div class="white-rounded-card">
+                <div class="card-header-text">Who do you want to say sorry to?</div>
+                <div class="input-wrapper">
+                    <input type="text" class="custom-input" id="friend-name-input" placeholder="Enter their name..." autofocus>
+                </div>
+            </div>
+
+            <button class="action-btn" onclick="startSorryBash()">
+                Next <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <div class="footer-brand">Explore more free digital craft concepts</div>
+        </div>
+
+
+        <!-- ================= SCREEN 2: THE GAME BOARD INTERFACE ================= -->
+        <div class="screen" id="screen-game">
+            <div style="text-align: center;">
+                <h2 class="title-text" style="font-size: 26px;">Sorry! Board Game 🎲</h2>
+                <p class="desc-text" style="margin-bottom: 10px;">You rolled a <strong style="color: var(--accent-pink);">Card 3</strong>! Move 3 steps to unlock.</p>
+            </div>
+
+            <!-- Steps Progress Node Indicator -->
+            <div class="game-track">
+                <div class="game-line-bg"></div>
+                <div class="game-line-progress" id="track-progress-bar"></div>
+                
+                <div class="game-node active" id="node-0">S</div>
+                <div class="game-node" id="node-1">1</div>
+                <div class="game-node" id="node-2">2</div>
+                <div class="game-node" id="node-3">3</div>
+            </div>
+
+            <!-- Dynamic Steps Container changing on click -->
+            <div class="step-showcase" id="step-content-box">
+                <!-- Loaded Dynamically via JS based on step state -->
+            </div>
+
+            <!-- Action triggering the game level step forward -->
+            <button class="action-btn" id="game-control-btn" onclick="moveNextStep()">
+                Roll & Move 1 Step <i class="fa-solid fa-dice"></i>
+            </button>
+            <div class="footer-brand">Made with ❤️ for <span id="dynamic-brand-name">your friend</span></div>
+        </div>
+
+
+        <!-- ================= SCREEN 3: GRAND FINALE / RECONCILIATION ================= -->
+        <div class="screen" id="screen-finale">
+            <h2 class="title-text" style="font-size: 28px; color: var(--accent-pink);">Finish Line! 🎉</h2>
+            <p class="desc-text" style="margin-bottom: 15px;">Aap final page par pahuch gaye!</p>
+
+            <!-- Warm Heartfelt Envelope -->
+            <div class="envelope-container">
+                <p><strong>Pyaare <span class="receiver-placeholder">Dost</span>,</strong></p>
+                <p>Mujhe pata hai maine galti kari aur tum mujhse naraz ho, par sach mein mera tumhara dil dukhane ka koi irada nahi tha. 🥺</p>
+                <p>Tumhare bina meri baatein aur masti adhoori hain. Jaldi se gussa thanda karo aur purani baatein bhool jao na please.</p>
+                <p class="letter-sig">— Tera Sabse Best Friend</p>
+            </div>
+
+            <!-- Interactive Cake Forgiveness Event Trigger -->
+            <div class="cake-area" onclick="triggerForgivenessAndConfetti()">
+                <div class="cake-graphic">🎂</div>
+                <div class="cake-label" id="forgive-instruction-text">Cut the Cake to Forgive Me!</div>
+            </div>
+
+            <button class="action-btn" id="whatsapp-back-btn" style="display: none; background-color: #25d366;" onclick="sendMessageOnWhatsapp()">
+                Send WhatsApp Hug! <i class="fa-brands fa-whatsapp"></i>
+            </button>
+            <div class="footer-brand">Crafted fully free at MyHeartCraft</div>
+        </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!--                       INTERACTIVE GAME LOGIC                      -->
+    <!-- ================================================================= -->
+    <script>
+        // Global State Variables
+        let friendName = "";
+        let currentStep = 0; // Steps track ranges from 0 (Welcome) -> 1 -> 2 -> 3
+
+        // STEP 1: Launch game board using customized inputs
+        function startSorryBash() {
+            const inputField = document.getElementById("friend-name-input");
+            friendName = inputField.value.trim();
+
+            if (friendName === "") {
+                // Shake effect or simple prompt if empty name
+                inputField.style.borderColor = "red";
+                alert("Please write your friend's name first! 😊");
+                return;
+            }
+
+            // Capitalize first letter beautifully
+            friendName = friendName.charAt(0).toUpperCase() + friendName.slice(1);
+
+            // Populate custom placeholder strings
+            document.getElementById("dynamic-brand-name").innerText = friendName;
+            const receiverSpans = document.querySelectorAll(".receiver-placeholder");
+            receiverSpans.forEach(span => span.innerText = friendName);
+
+            // Switch Screen
+            switchScreen("screen-input", "screen-game");
+            
+            // Initialize Step Content inside Game Board
+            renderStepContent();
+        }
+
+        // Switch helper
+        function switchScreen(oldId, newId) {
+            document.getElementById(oldId).classList.remove("active");
+            document.getElementById(newId).classList.add("active");
+        }
+
+        // STEP 2: Render Content inside game area dynamically
+        function renderStepContent() {
+            const contentBox = document.getElementById("step-content-box");
+            const btn = document.getElementById("game-control-btn");
+
+            if (currentStep === 0) {
+                // INITIAL STATE (Step 0)
+                contentBox.innerHTML = `
+                    <div class="funny-illustration-container">
+                        <!-- Loaded cute illustration via retrieved source -->
+                        <img src="http://googleusercontent.com/image_collection/image_retrieval/14836093471562985189_0" alt="Cute Sorry Cartoon">
+                    </div>
+                    <div class="funny-caption">
+                        "Whoops! Lagta hai hamare beech thodi unban ho gayi hai... chalo game khel ke resolve karein! Choose step to roll die!"
+                    </div>
+                `;
+                btn.innerHTML = `Roll Die to Move Step 1 <i class="fa-solid fa-dice"></i>`;
+            } 
+            else if (currentStep === 1) {
+                // STEP 1 CONTENT
+                contentBox.innerHTML = `
+                    <div clas
